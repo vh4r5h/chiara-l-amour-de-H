@@ -2,28 +2,27 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Harsh ❤️ Chiara</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>HARSH ❤️ CHIARA</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #0a0005; font-family: 'Helvetica Neue', sans-serif; }
-        #overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column; justify-content: space-between;
+        body { margin: 0; overflow: hidden; background: #050002; }
+        #ui {
+            position: absolute; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center;
             align-items: center; pointer-events: none; z-index: 10;
-            padding: 40px 0;
         }
-        .name-tag {
-            color: #ff4d6d; font-size: 1.5rem; font-weight: 300; letter-spacing: 5px;
-            text-shadow: 0 0 15px rgba(255, 77, 109, 0.8); animation: glow 2s ease-in-out infinite alternate;
+        .main-title {
+            color: #fff; font-family: 'Times New Roman', serif;
+            font-size: 2.5rem; letter-spacing: 8px; opacity: 0.8;
+            text-shadow: 0 0 20px #ff4d6d; text-align: center;
         }
-        @keyframes glow { from { opacity: 0.6; } to { opacity: 1; } }
-        canvas { display: block; touch-action: none; }
+        .sub-title { color: #ff4d6d; font-size: 0.9rem; margin-top: 10px; letter-spacing: 3px; }
     </style>
 </head>
 <body>
-    <div id="overlay">
-        <div class="name-tag">CHIARA</div>
-        <div class="name-tag" style="font-size: 0.8rem; color: white;">BY HARSH</div>
+    <div id="ui">
+        <div class="main-title">CHIARA</div>
+        <div class="sub-title">ETERNALLY BY HARSH</div>
     </div>
 
     <script type="importmap">
@@ -34,101 +33,104 @@
         import * as THREE from 'three';
 
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setPixelRatio(window.devicePixelRatio);
         document.body.appendChild(renderer.domElement);
 
-        // --- Romantic Lighting ---
-        const ambient = new THREE.AmbientLight(0xffffff, 0.4);
-        scene.add(ambient);
-        const pinkLight = new THREE.PointLight(0xff4d6d, 2, 20);
-        pinkLight.position.set(2, 3, 4);
-        scene.add(pinkLight);
+        // --- High-End Lighting ---
+        const sun = new THREE.DirectionalLight(0xffffff, 2);
+        sun.position.set(5, 10, 7.5);
+        scene.add(sun);
+        const rimLight = new THREE.PointLight(0xff4d6d, 5, 50);
+        rimLight.position.set(-5, -5, -2);
+        scene.add(rimLight);
 
-        // --- The "Real" Plumeria Petal Logic ---
-        function createRealisticFlower() {
-            const flower = new THREE.Group();
-            // Thick, curved petal geometry
-            const petalGeom = new THREE.TorusGeometry(0.6, 0.2, 12, 24, Math.PI / 1.5);
+        // --- 10/10 Realistic Plumeria Logic ---
+        function createDeluxeFlower() {
+            const flowerGroup = new THREE.Group();
+            
+            // Texture for the "Soft Yellow Center"
+            const canvas = document.createElement('canvas');
+            canvas.width = 256; canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+            const grad = ctx.createRadialGradient(128, 128, 10, 128, 128, 110);
+            grad.addColorStop(0, '#ffcc00');
+            grad.addColorStop(0.4, '#fff9e6');
+            grad.addColorStop(1, '#ffffff');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 256, 256);
+            const texture = new THREE.CanvasTexture(canvas);
+
+            const petalGeom = new THREE.SphereGeometry(0.7, 32, 32);
+            petalGeom.scale(1, 0.15, 0.5); // Flattening to real petal shape
+            
             const petalMat = new THREE.MeshStandardMaterial({ 
-                color: 0xffffff, 
-                roughness: 0.1, 
-                metalness: 0.1,
-                emissive: 0xfff0f5,
-                emissiveIntensity: 0.1
+                map: texture, 
+                roughness: 0.4, 
+                metalness: 0.05,
+                side: THREE.DoubleSide 
             });
 
             for(let i = 0; i < 5; i++) {
                 const petal = new THREE.Mesh(petalGeom, petalMat);
-                petal.scale.set(1, 1.5, 0.5);
-                petal.rotation.z = (i * Math.PI * 2) / 5;
-                petal.rotation.x = 1.5;
-                flower.add(petal);
+                petal.position.x = 0.5;
+                const pivot = new THREE.Group();
+                pivot.rotation.z = (i * Math.PI * 2) / 5;
+                pivot.rotation.y = 0.3; // Slight upward curve
+                pivot.add(petal);
+                flowerGroup.add(pivot);
             }
-
-            const center = new THREE.Mesh(
-                new THREE.SphereGeometry(0.25, 32, 32),
-                new THREE.MeshStandardMaterial({ color: 0xffd000, emissive: 0xffa200 })
-            );
-            flower.add(center);
-            return flower;
+            return flowerGroup;
         }
 
         const bouquet = new THREE.Group();
-        for(let i = 0; i < 8; i++) {
-            const f = createRealisticFlower();
-            f.position.set(Math.cos(i) * 1.5, Math.sin(i) * 1.5, Math.random() * 0.5);
-            f.rotation.z = Math.random() * Math.PI;
-            bouquet.add(f);
+        for(let i = 0; i < 15; i++) {
+            const flower = createDeluxeFlower();
+            const angle = Math.random() * Math.PI * 2;
+            const radius = 1.5 + Math.random();
+            flower.position.set(Math.cos(angle)*radius, Math.sin(angle)*radius, Math.random());
+            flower.rotation.set(Math.random(), Math.random(), Math.random());
+            flower.scale.setScalar(0.6 + Math.random() * 0.4);
+            bouquet.add(flower);
         }
         scene.add(bouquet);
 
-        // --- Red Heart Rain ---
+        // --- Hearts Rain ---
+        const hearts = [];
         const heartShape = new THREE.Shape();
         heartShape.moveTo(0, 0);
         heartShape.bezierCurveTo(0, 0, -0.5, 0.5, -0.5, 1);
-        heartShape.bezierCurveTo(-0.5, 1.5, 0.2, 1.8, 0, 1);
-        heartShape.bezierCurveTo(0.2, 1.8, 0.5, 1.5, 0.5, 1);
-        heartShape.bezierCurveTo(0.5, 0.5, 0, 0, 0, 0);
-
+        heartShape.bezierCurveTo(-0.5, 1.5, 0.5, 1.5, 0.5, 1);
+        heartShape.bezierCurveTo(0.5, 1.5, 1.5, 1.5, 1.5, 1);
+        heartShape.bezierCurveTo(1.5, 0.5, 0.5, 0, 0.5, 0);
+        
         const heartGeom = new THREE.ShapeGeometry(heartShape);
-        const heartMat = new THREE.MeshBasicMaterial({ color: 0xff0033, side: THREE.DoubleSide });
-        const hearts = [];
+        const heartMat = new THREE.MeshPhongMaterial({ color: 0xff0044, shininess: 100 });
 
-        for(let i = 0; i < 100; i++) {
-            const heart = new THREE.Mesh(heartGeom, heartMat);
-            heart.position.set(Math.random()*20-10, Math.random()*20, Math.random()*10-5);
-            heart.scale.set(0.2, 0.2, 0.2);
-            scene.add(heart);
-            hearts.push(heart);
+        for(let i = 0; i < 60; i++) {
+            const h = new THREE.Mesh(heartGeom, heartMat);
+            h.position.set(Math.random()*20-10, Math.random()*20-5, Math.random()*-10);
+            h.rotation.x = Math.PI;
+            scene.add(h);
+            hearts.push(h);
         }
 
-        camera.position.z = 5;
+        camera.position.z = 8;
 
-        // --- Interaction & Animation ---
-        let targetRotationX = 0;
-        let targetRotationY = 0;
-
-        window.addEventListener('touchmove', (e) => {
-            targetRotationY = (e.touches[0].clientX / window.innerWidth - 0.5) * 2;
-            targetRotationX = (e.touches[0].clientY / window.innerHeight - 0.5) * 2;
-        });
-
+        // --- Animation ---
         function animate() {
             requestAnimationFrame(animate);
-            const time = Date.now() * 0.001;
+            const t = Date.now() * 0.001;
 
-            // Bouquet Float
-            bouquet.rotation.y += 0.01;
-            bouquet.rotation.x += (targetRotationX - bouquet.rotation.x) * 0.05;
-            bouquet.position.y = Math.sin(time) * 0.3;
-
-            // Heart Rain Logic
-            hearts.forEach(h => {
-                h.position.y -= 0.05;
-                h.rotation.y += 0.02;
+            bouquet.rotation.y = Math.sin(t * 0.5) * 0.3;
+            bouquet.rotation.x = Math.cos(t * 0.5) * 0.2;
+            
+            hearts.forEach((h, i) => {
+                h.position.y -= 0.03;
+                h.rotation.z += 0.01;
+                h.scale.setScalar(0.3 + Math.sin(t + i) * 0.1);
                 if(h.position.y < -10) h.position.y = 10;
             });
 
@@ -136,7 +138,7 @@
         }
         animate();
 
-        // Responsive Resize
+        // Responsive handling
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
