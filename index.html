@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>For Chiara - White Plumeria</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: radial-gradient(circle, #1a1a1a, #000); }
+        #label {
+            position: absolute; bottom: 30px; width: 100%; text-align: center;
+            color: white; font-family: 'Georgia', serif; letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5); pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="label">POUR CHIARA</div>
+    <script type="importmap">
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.body.appendChild(renderer.domElement);
+
+        // --- Lighting (The "Wow" Factor) ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+        const spotLight = new THREE.SpotLight(0xffffff, 2);
+        spotLight.position.set(5, 5, 5);
+        scene.add(spotLight);
+
+        // --- Creating a Plumeria Flower Group ---
+        function createPlumeria() {
+            const flower = new THREE.Group();
+            
+            // Petal Geometry
+            const petalGeom = new THREE.CapsuleGeometry(0.5, 1, 4, 16);
+            const petalMat = new THREE.MeshStandardMaterial({ 
+                color: 0xffffff, 
+                roughness: 0.3,
+                emissive: 0xfff9e6,
+                emissiveIntensity: 0.2
+            });
+
+            for(let i = 0; i < 5; i++) {
+                const petal = new THREE.Mesh(petalGeom, petalMat);
+                petal.rotation.z = (i * (Math.PI * 2) / 5);
+                petal.rotation.x = 1.2;
+                petal.position.y = 0.5;
+                flower.add(petal);
+            }
+
+            // Yellow Center (Stigma)
+            const centerGeom = new THREE.SphereGeometry(0.3, 16, 16);
+            const centerMat = new THREE.MeshStandardMaterial({ color: 0xffd700 });
+            const center = new THREE.Mesh(centerGeom, centerMat);
+            flower.add(center);
+
+            return flower;
+        }
+
+        // Generate Bouquet
+        const bouquet = new THREE.Group();
+        for(let i = 0; i < 12; i++) {
+            const f = createPlumeria();
+            f.position.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).multiplyScalar(3);
+            f.rotation.set(Math.random(), Math.random(), Math.random());
+            bouquet.add(f);
+        }
+        scene.add(bouquet);
+
+        camera.position.z = 6;
+
+        // --- Animation Loop ---
+        let mouseX = 0, mouseY = 0;
+        document.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX - window.innerWidth / 2) / 100;
+            mouseY = (e.clientY - window.innerHeight / 2) / 100;
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Gentle rotation
+            bouquet.rotation.y += 0.005;
+            
+            // Mouse Influence
+            bouquet.rotation.x += (mouseY - bouquet.rotation.x) * 0.05;
+            bouquet.rotation.z += (mouseX - bouquet.rotation.z) * 0.05;
+
+            // Breathing effect
+            const time = Date.now() * 0.001;
+            bouquet.position.y = Math.sin(time) * 0.2;
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
