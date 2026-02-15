@@ -2,105 +2,141 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>For Chiara - White Plumeria</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Harsh ❤️ Chiara</title>
     <style>
-        body { margin: 0; overflow: hidden; background: radial-gradient(circle, #1a1a1a, #000); }
-        #label {
-            position: absolute; bottom: 30px; width: 100%; text-align: center;
-            color: white; font-family: 'Georgia', serif; letter-spacing: 2px;
-            text-shadow: 0 0 10px rgba(255,255,255,0.5); pointer-events: none;
+        body { margin: 0; overflow: hidden; background: #0a0005; font-family: 'Helvetica Neue', sans-serif; }
+        #overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: space-between;
+            align-items: center; pointer-events: none; z-index: 10;
+            padding: 40px 0;
         }
+        .name-tag {
+            color: #ff4d6d; font-size: 1.5rem; font-weight: 300; letter-spacing: 5px;
+            text-shadow: 0 0 15px rgba(255, 77, 109, 0.8); animation: glow 2s ease-in-out infinite alternate;
+        }
+        @keyframes glow { from { opacity: 0.6; } to { opacity: 1; } }
+        canvas { display: block; touch-action: none; }
     </style>
 </head>
 <body>
-    <div id="label">POUR CHIARA</div>
+    <div id="overlay">
+        <div class="name-tag">CHIARA</div>
+        <div class="name-tag" style="font-size: 0.8rem; color: white;">BY HARSH</div>
+    </div>
+
     <script type="importmap">
         { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
     </script>
+
     <script type="module">
         import * as THREE from 'three';
 
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         document.body.appendChild(renderer.domElement);
 
-        // --- Lighting (The "Wow" Factor) ---
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-        scene.add(ambientLight);
-        const spotLight = new THREE.SpotLight(0xffffff, 2);
-        spotLight.position.set(5, 5, 5);
-        scene.add(spotLight);
+        // --- Romantic Lighting ---
+        const ambient = new THREE.AmbientLight(0xffffff, 0.4);
+        scene.add(ambient);
+        const pinkLight = new THREE.PointLight(0xff4d6d, 2, 20);
+        pinkLight.position.set(2, 3, 4);
+        scene.add(pinkLight);
 
-        // --- Creating a Plumeria Flower Group ---
-        function createPlumeria() {
+        // --- The "Real" Plumeria Petal Logic ---
+        function createRealisticFlower() {
             const flower = new THREE.Group();
-            
-            // Petal Geometry
-            const petalGeom = new THREE.CapsuleGeometry(0.5, 1, 4, 16);
+            // Thick, curved petal geometry
+            const petalGeom = new THREE.TorusGeometry(0.6, 0.2, 12, 24, Math.PI / 1.5);
             const petalMat = new THREE.MeshStandardMaterial({ 
                 color: 0xffffff, 
-                roughness: 0.3,
-                emissive: 0xfff9e6,
-                emissiveIntensity: 0.2
+                roughness: 0.1, 
+                metalness: 0.1,
+                emissive: 0xfff0f5,
+                emissiveIntensity: 0.1
             });
 
             for(let i = 0; i < 5; i++) {
                 const petal = new THREE.Mesh(petalGeom, petalMat);
-                petal.rotation.z = (i * (Math.PI * 2) / 5);
-                petal.rotation.x = 1.2;
-                petal.position.y = 0.5;
+                petal.scale.set(1, 1.5, 0.5);
+                petal.rotation.z = (i * Math.PI * 2) / 5;
+                petal.rotation.x = 1.5;
                 flower.add(petal);
             }
 
-            // Yellow Center (Stigma)
-            const centerGeom = new THREE.SphereGeometry(0.3, 16, 16);
-            const centerMat = new THREE.MeshStandardMaterial({ color: 0xffd700 });
-            const center = new THREE.Mesh(centerGeom, centerMat);
+            const center = new THREE.Mesh(
+                new THREE.SphereGeometry(0.25, 32, 32),
+                new THREE.MeshStandardMaterial({ color: 0xffd000, emissive: 0xffa200 })
+            );
             flower.add(center);
-
             return flower;
         }
 
-        // Generate Bouquet
         const bouquet = new THREE.Group();
-        for(let i = 0; i < 12; i++) {
-            const f = createPlumeria();
-            f.position.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).multiplyScalar(3);
-            f.rotation.set(Math.random(), Math.random(), Math.random());
+        for(let i = 0; i < 8; i++) {
+            const f = createRealisticFlower();
+            f.position.set(Math.cos(i) * 1.5, Math.sin(i) * 1.5, Math.random() * 0.5);
+            f.rotation.z = Math.random() * Math.PI;
             bouquet.add(f);
         }
         scene.add(bouquet);
 
-        camera.position.z = 6;
+        // --- Red Heart Rain ---
+        const heartShape = new THREE.Shape();
+        heartShape.moveTo(0, 0);
+        heartShape.bezierCurveTo(0, 0, -0.5, 0.5, -0.5, 1);
+        heartShape.bezierCurveTo(-0.5, 1.5, 0.2, 1.8, 0, 1);
+        heartShape.bezierCurveTo(0.2, 1.8, 0.5, 1.5, 0.5, 1);
+        heartShape.bezierCurveTo(0.5, 0.5, 0, 0, 0, 0);
 
-        // --- Animation Loop ---
-        let mouseX = 0, mouseY = 0;
-        document.addEventListener('mousemove', (e) => {
-            mouseX = (e.clientX - window.innerWidth / 2) / 100;
-            mouseY = (e.clientY - window.innerHeight / 2) / 100;
+        const heartGeom = new THREE.ShapeGeometry(heartShape);
+        const heartMat = new THREE.MeshBasicMaterial({ color: 0xff0033, side: THREE.DoubleSide });
+        const hearts = [];
+
+        for(let i = 0; i < 100; i++) {
+            const heart = new THREE.Mesh(heartGeom, heartMat);
+            heart.position.set(Math.random()*20-10, Math.random()*20, Math.random()*10-5);
+            heart.scale.set(0.2, 0.2, 0.2);
+            scene.add(heart);
+            hearts.push(heart);
+        }
+
+        camera.position.z = 5;
+
+        // --- Interaction & Animation ---
+        let targetRotationX = 0;
+        let targetRotationY = 0;
+
+        window.addEventListener('touchmove', (e) => {
+            targetRotationY = (e.touches[0].clientX / window.innerWidth - 0.5) * 2;
+            targetRotationX = (e.touches[0].clientY / window.innerHeight - 0.5) * 2;
         });
 
         function animate() {
             requestAnimationFrame(animate);
-            
-            // Gentle rotation
-            bouquet.rotation.y += 0.005;
-            
-            // Mouse Influence
-            bouquet.rotation.x += (mouseY - bouquet.rotation.x) * 0.05;
-            bouquet.rotation.z += (mouseX - bouquet.rotation.z) * 0.05;
-
-            // Breathing effect
             const time = Date.now() * 0.001;
-            bouquet.position.y = Math.sin(time) * 0.2;
+
+            // Bouquet Float
+            bouquet.rotation.y += 0.01;
+            bouquet.rotation.x += (targetRotationX - bouquet.rotation.x) * 0.05;
+            bouquet.position.y = Math.sin(time) * 0.3;
+
+            // Heart Rain Logic
+            hearts.forEach(h => {
+                h.position.y -= 0.05;
+                h.rotation.y += 0.02;
+                if(h.position.y < -10) h.position.y = 10;
+            });
 
             renderer.render(scene, camera);
         }
         animate();
 
+        // Responsive Resize
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
